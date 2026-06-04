@@ -3,7 +3,7 @@ require_relative '../lib/card'
 
 describe Player do
   describe '#initialize' do
-    let!(:player) { Player.new('Player1') }
+    let!(:player) { described_class.new('Player1') }
     it 'has a name' do
       expect(player.name).to eq 'Player1'
     end
@@ -15,7 +15,7 @@ describe Player do
     end
   end
   describe '#add_cards' do
-    let(:player) { Player.new('Player1') }
+    let(:player) { described_class.new('Player1') }
     let(:card1) { Card.new('A', 'Spades') }
     let(:card2) { Card.new('K', 'Spades') }
     context 'when player has no cards' do
@@ -40,7 +40,7 @@ describe Player do
     end
   end
   describe 'next_card' do
-    let(:player) { Player.new('Player1') }
+    let(:player) { described_class.new('Player1') }
     context 'when hand is not empty' do
       it 'returns top card and does not remove' do
         card1 = Card.new('A', 'Spades')
@@ -59,7 +59,7 @@ describe Player do
     end
   end
   describe '#take_top_card' do
-    let(:player) { Player.new('Player1') }
+    let(:player) { described_class.new('Player1') }
     context 'when hand is not empty' do
       it 'returns top card and removes from hand' do
         card1 = Card.new('A', 'Spades')
@@ -78,7 +78,7 @@ describe Player do
     end
   end
   describe '#hand_size' do
-    let(:player) { Player.new('Player1') }
+    let(:player) { described_class.new('Player1') }
     it 'returns the current hand size' do
       expect(player.hand_size).to eq 0
     end
@@ -92,7 +92,7 @@ describe Player do
     end
   end
   # xdescribe '#add_book' do
-  #   let(:player) { Player.new('Player1') }
+  #   let(:player) { described_class.new('Player1') }
   # end
   # xdescribe '#book_size' do
     
