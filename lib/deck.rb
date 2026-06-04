@@ -4,8 +4,8 @@ class Deck
   attr_accessor :cards
 
   def initialize
-    @cards = Card::RANKS.flat_map do |rank|
-      Card::SUITS.map do |suit|
+    @cards = Card::SUITS.flat_map do |suit|
+      Card::RANKS.map do |rank|
         Card.new(rank, suit)
       end
     end
