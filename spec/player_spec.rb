@@ -92,11 +92,11 @@ describe Player do
       expect(player.hand_size).to eq 2
     end
   end
-  describe '#try_to_find_cards' do
+  describe '#take_cards_of_rank' do
     let(:player) { described_class.new('Player1') }
     context 'when player does not have the correct card' do
       it 'returns nil' do
-        expect(player.try_to_find_cards('A')).to be nil
+        expect(player.take_cards_of_rank('A')).to be_empty
       end
     end
     context 'when player has one of the correct card' do
@@ -105,7 +105,7 @@ describe Player do
         player.hand = [card, Card.new('K'), Card.new('J')]
       end
       it 'returns array of card and remove card from hand' do
-        expect(player.try_to_find_cards('A')).to eq [card]
+        expect(player.take_cards_of_rank('A')).to eq [card]
         expect(player.hand_size).to eq 2
       end
     end
@@ -116,7 +116,7 @@ describe Player do
         player.hand = [card1, Card.new('A'), card2]
       end
       it 'returns array of cards and remove cards from hand' do
-        expect(player.try_to_find_cards('K')).to eq [card1, card2]
+        expect(player.take_cards_of_rank('K')).to eq [card1, card2]
         expect(player.hand_size).to eq 1
       end
     end

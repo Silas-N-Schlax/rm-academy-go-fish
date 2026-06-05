@@ -26,14 +26,16 @@ class Player
     hand.size
   end
 
-  def try_to_find_cards(rank)
-    cards = []
-    hand.each do |card|
-      cards << card if card.rank == rank
-    end
-    delete_cards(cards)
-    cards unless cards.empty?
+  def take_cards_of_rank(rank)
+    find_by_rank = ->(card) { card.rank == rank }
+
+    cards_of_rank = hand.select(&find_by_rank)
+    hand.delete_if(&find_by_rank)
+
+    cards_of_rank
   end
+
+  # TODO: #has_card? (check that the player has at least one of the card with the rank given).
 
   def create_book(book_rank)
     books << Book.new(book_rank)
@@ -46,6 +48,7 @@ class Player
   private
 
   def delete_cards(cards)
+    # ! Remove?
     cards.each do |card|
       hand.delete(card)
     end
