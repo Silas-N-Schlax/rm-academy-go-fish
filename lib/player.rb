@@ -1,3 +1,4 @@
+require_relative 'books'
 # Player class
 class Player
   attr_reader :name
@@ -23,5 +24,30 @@ class Player
 
   def hand_size
     hand.size
+  end
+
+  def try_to_find_cards(rank)
+    cards = []
+    hand.each do |card|
+      cards << card if card.rank == rank
+    end
+    delete_cards(cards)
+    cards unless cards.empty?
+  end
+
+  def create_book(book_rank)
+    books << Book.new(book_rank)
+  end
+
+  def books_size
+    books.size
+  end
+
+  private
+
+  def delete_cards(cards)
+    cards.each do |card|
+      hand.delete(card)
+    end
   end
 end
