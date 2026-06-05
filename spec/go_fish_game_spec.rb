@@ -54,5 +54,92 @@ describe GoFishGame do
       end
     end
   end
-  describe '#run_turn'
+  describe '#current_player' do
+    let(:game) { described_class.new(players[0..1]) }
+    it 'returns current player' do
+      expect(game.current_player.name).to eq 'player1'
+    end
+  end
+  describe '#run_turn' do
+    let(:card1) { Card.new('A') }
+    context 'when a turn is run with 2 players' do
+      context 'when player1 is asking player2 for a card they have' do
+        let(:game) { described_class.new(players[0..1]) }
+        let!(:player1) { game.players[0] }
+        let!(:player2) { game.players[1] }
+        before do
+          game.players[1].hand << card1
+          game.run_turn('player2', 'A')
+        end
+        it 'player 1 gets the cards added to their hand' do
+          expect(player1.hand_size).to eq 1
+        end
+        it 'player2 gets the cards removed from their hand' do
+          expect(player2.hand_size).to eq 0
+        end
+        context 'when player1 asks player2 for another card they do not have' do
+          before do
+            game.run_turn('player2', 'J')
+          end
+          context 'player1 does not pick up the card' do
+            it 'card is added to player1 hand' do
+              expect(player1.hand_size).to eq 2
+            end
+            it 'current player is set to next player in queue' do
+              expect(game.current_player.name).to be player2.name
+            end
+          end
+        end
+      end
+      context 'when player1 asks for a card that they do not have' do
+        let(:game) { described_class.new(players[0..1]) }
+        let!(:player1) { game.players[0] }
+        context 'when they pick up that card' do
+          before do
+            game.deck.cards.unshift(Card.new('A'))
+            game.run_turn('player1', 'A')
+          end
+          it 'adds card to their hand' do
+            expect(player1.hand_size).to eq 1
+          end
+          it 'they are still current player' do
+            expect(game.current_player.name).to eq player1.name
+          end
+        end
+      end
+      context 'when player1 asks a player that does not exist' do
+        let(:game) { described_class.new(players[0..1]) }
+        it 'returns nil' do
+          expect(game.run_turn('player3', 'J')).to be nil
+        end
+      end
+      context 'when player1 is asking player2 for a card they do not have' do
+        let(:game) { described_class.new(players[0..1]) }
+        let!(:player1) { game.players[0] }
+        let!(:player2) { game.players[1] }
+        context 'when player1 does not pick up that card' do
+          before { game.run_turn('player2', 'A') }
+          it 'card is added to player1 hand' do
+            expect(player1.hand_size).to eq 1
+          end
+          it 'current player is set to next player in queue' do
+            expect(game.current_player.name).to eq player2.name
+          end
+        end
+      end
+      context 'when there deck is empty and a player goes fishing' do
+        let(:game) { described_class.new(players[0..1]) }
+        before do
+          game.deck.cards = []
+          game.run_turn('player1', 'A')
+        end
+        it 'does not give the player a card' do
+          expect(game.players[1].hand_size).to eq 0
+        end
+        it 'sets the current player to next player in the queue' do
+          expect(game.current_player.name).to eq 'player2'
+        end
+      end
+    end
+  end
 end

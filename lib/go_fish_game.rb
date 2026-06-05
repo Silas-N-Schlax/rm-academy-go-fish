@@ -20,7 +20,36 @@ class GoFishGame
     deal
   end
 
+  def run_turn(player, rank)
+    return nil unless find_player(player)
+
+    player_in_question = find_player(player)
+    cards = player_in_question.try_to_find_cards(rank)
+
+    current_player.add_cards(cards) unless cards.nil?
+    go_fish(rank) if cards.nil?
+  end
+
+  def current_player
+    players.first
+  end
+
   private
+
+  def go_fish(rank)
+    card = deck.top_card
+    return players.rotate! if card.nil?
+
+    current_player.add_cards([card])
+    players.rotate! unless card.rank == rank
+  end
+
+  def find_player(player_to_find)
+    players.each do |player|
+      return player if player.name == player_to_find
+    end
+    nil
+  end
 
   def deal
     number_of_cards_to_deal.times do
