@@ -23,11 +23,14 @@ class GoFishGame
   def run_turn(player, rank)
     return nil unless find_player(player)
 
-    player_in_question = find_player(player)
-    cards = player_in_question.try_to_find_cards(rank)
+    # TODO: create a method that validates input that is called
+    # by the server returning errors or messages etc...
 
-    current_player.add_cards(cards) unless cards.nil?
-    go_fish(rank) if cards.nil?
+    player_in_question = find_player(player)
+    cards = player_in_question.take_cards_of_rank(rank)
+
+    current_player.add_cards(cards) unless cards.empty?
+    go_fish(rank) if cards.empty?
   end
 
   def current_player

@@ -65,17 +65,18 @@ describe GoFishGame do
     context 'when a turn is run with 2 players' do
       context 'when player1 is asking player2 for a card they have' do
         let(:game) { described_class.new(players[0..1]) }
-        let!(:player1) { game.players[0] }
-        let!(:player2) { game.players[1] }
+        let!(:player1) { game.players.first }
+        let!(:player2) { game.players.last }
         before do
-          game.players[1].hand << card1
+          player2.hand << card1
           game.run_turn('player2', 'A')
         end
         it 'player 1 gets the cards added to their hand' do
-          expect(player1.hand_size).to eq 1
+          expected_hand_size = 1
+          expect(player1.hand_size).to eq expected_hand_size
         end
         it 'player2 gets the cards removed from their hand' do
-          expect(player2.hand_size).to eq 0
+          expect(player2.hand_size).to be_zero
         end
         context 'when player1 asks player2 for another card they do not have' do
           before do
@@ -83,7 +84,8 @@ describe GoFishGame do
           end
           context 'player1 does not pick up the card' do
             it 'card is added to player1 hand' do
-              expect(player1.hand_size).to eq 2
+              expected_hand_size = 2
+              expect(player1.hand_size).to eq expected_hand_size
             end
             it 'current player is set to next player in queue' do
               expect(game.current_player.name).to be player2.name
@@ -93,14 +95,15 @@ describe GoFishGame do
       end
       context 'when player1 asks for a card that they do not have' do
         let(:game) { described_class.new(players[0..1]) }
-        let!(:player1) { game.players[0] }
+        let!(:player1) { game.players.first }
         context 'when they pick up that card' do
           before do
             game.deck.cards.unshift(Card.new('A'))
             game.run_turn('player1', 'A')
           end
           it 'adds card to their hand' do
-            expect(player1.hand_size).to eq 1
+            expected_hand_size = 1
+            expect(player1.hand_size).to eq expected_hand_size
           end
           it 'they are still current player' do
             expect(game.current_player.name).to eq player1.name
@@ -115,12 +118,13 @@ describe GoFishGame do
       end
       context 'when player1 is asking player2 for a card they do not have' do
         let(:game) { described_class.new(players[0..1]) }
-        let!(:player1) { game.players[0] }
-        let!(:player2) { game.players[1] }
+        let!(:player1) { game.players.first }
+        let!(:player2) { game.players.last }
         context 'when player1 does not pick up that card' do
           before { game.run_turn('player2', 'A') }
           it 'card is added to player1 hand' do
-            expect(player1.hand_size).to eq 1
+            expected_hand_size = 1
+            expect(player1.hand_size).to eq expected_hand_size
           end
           it 'current player is set to next player in queue' do
             expect(game.current_player.name).to eq player2.name
@@ -129,17 +133,25 @@ describe GoFishGame do
       end
       context 'when there deck is empty and a player goes fishing' do
         let(:game) { described_class.new(players[0..1]) }
+        let!(:player2) { game.players.last }
         before do
           game.deck.cards = []
           game.run_turn('player1', 'A')
         end
         it 'does not give the player a card' do
-          expect(game.players[1].hand_size).to eq 0
+          expect(player2.hand_size).to be_zero
         end
         it 'sets the current player to next player in the queue' do
-          expect(game.current_player.name).to eq 'player2'
+          expect(game.current_player.name).to eq player2.name
         end
       end
+      # TODO: Not just hand size, but that it includes the card
+      # ^ I.e hand.include(card) or something similar.
+      # TODO: check that there are enough cards to make a book
+      # TODO: check the size of the deck has been changed?
+      # ^ use constants
+      # and that it removes all cards from hand and adds new
+      # book to players books.
     end
   end
 end
