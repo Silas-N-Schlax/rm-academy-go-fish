@@ -97,6 +97,19 @@ describe Client do
         expected_message = '0'
         client.provide_input(expected_message)
         expect(server_client.ask_for_player).to eq expected_message
+        expect(server_client.selected_player).to eq expected_message
+      end
+    end
+    context 'when player is asked for a player again' do
+      let!(:client) { create_test_client }
+      let(:server_client) { Client.new(@server.clients.first.socket, player_id: 1) }
+      before do
+        client.provide_input('0')
+        server_client.ask_for_player
+      end
+      it 'does not set to nil' do
+        server_client.ask_for_player
+        expect(server_client.selected_player).to_not be_nil
       end
     end
   end
@@ -122,6 +135,19 @@ describe Client do
         expected_message = 'A'
         client.provide_input(expected_message)
         expect(server_client.ask_for_rank).to eq expected_message
+        expect(server_client.selected_rank).to eq expected_message
+      end
+    end
+    context 'when player is asked for a rank again' do
+      let!(:client) { create_test_client }
+      let(:server_client) { Client.new(@server.clients.first.socket, player_id: 1) }
+      before do
+        client.provide_input('0')
+        server_client.ask_for_rank
+      end
+      it 'does not set to nil' do
+        server_client.ask_for_rank
+        expect(server_client.selected_rank).to_not be_nil
       end
     end
   end

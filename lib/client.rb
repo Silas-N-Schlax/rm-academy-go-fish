@@ -1,6 +1,8 @@
 # Client Socket
 class Client
-  attr_accessor :name, :has_sent_name_message, :host_message, :selected_player_message, :selected_rank_message
+  attr_accessor :name, :has_sent_name_message, :host_message,
+                :selected_player, :selected_player_message,
+                :selected_rank, :selected_rank_message
   attr_reader :socket, :host, :player_id
 
   INPUT_SYMBOL = ' -> '.freeze
@@ -17,22 +19,26 @@ class Client
   end
 
   def ask_for_player
+    return if selected_player
+
     message = 'Who would you like to ask?'
     write_socket(message + INPUT_SYMBOL) unless selected_player_message
     self.selected_player_message = true
     has_message = read_socket
-    has_message&.chomp
+    self.selected_player = has_message&.chomp
   end
 
   def ask_for_rank
+    return if selected_rank
+
     message = 'What rank would you like to ask for?'
     write_socket(message + INPUT_SYMBOL) unless selected_rank_message
     self.selected_rank_message = true
     has_message = read_socket
-    has_message&.chomp
+    self.selected_rank = has_message&.chomp
   end
 
-  def read_socket(delay = 0.7)
+  def read_socket(delay = 0.3)
     sleep(delay)
     socket.read_nonblock(1000)
   rescue IO::WaitReadable
