@@ -19,7 +19,7 @@ describe Client do
     end
   end
   describe 'initial values' do
-    let(:client) { described_class.new(MockSocketClient.new(@server.port_number)) }
+    let(:client) { described_class.new(MockSocketClient.new(@server.port_number), player_id: 0) }
     it 'name and name message set to to nil' do
       expect(client.name).to be_nil
       expect(client.has_sent_name_message).to be_nil
@@ -30,45 +30,98 @@ describe Client do
     it 'has a host set to false' do
       expect(client.host?).to be false
     end
+    it 'has a id number' do
+      expect(client.player_id).to eq 0
+    end
   end
   describe '#host?' do
     context 'when player is host' do
-      let(:client) { described_class.new('socket', host: true) }
+      let(:client) { described_class.new('socket', host: true, player_id: 0) }
       it 'returns true' do
         expect(client.host?).to be true
       end
     end
     context 'when player is not host' do
-      let(:client) { described_class.new('socket') }
+      let(:client) { described_class.new('socket', player_id: 0) }
       it 'returns false' do
         expect(client.host?).to be false
       end
     end
   end
   describe '#read_socket' do
-    let!(:client) { Client.new(create_test_client) }
+    let!(:client) { create_test_client }
+    let(:server_client) { Client.new(@server.clients.first.socket, player_id: 0) }
     let(:message) { 'Hello World!' }
     context 'when message exists' do
       before do
-        server_client_socket = @server.clients.first.socket
-        @server.write_socket(server_client_socket, message)
+        client.provide_input(message)
       end
       it 'returns message' do
-        expect(client.read_socket.chomp).to eq message
+        expect(server_client.read_socket.chomp).to eq message
       end
     end
   end
 
   describe '#write_socket' do
-    let!(:client) { Client.new(create_test_client) }
+    let!(:client) { create_test_client }
+    let(:server_client) { Client.new(@server.clients.first.socket, player_id: 0) }
     let(:message) { 'Hello World!' }
     context 'when a message is sent' do
       before do
-        client.write_socket(message)
+        server_client.write_socket(message)
       end
-      it 'the server gets the message' do
-        server_client_socket = @server.clients.first.socket
-        expect(@server.read_socket(server_client_socket).chomp).to eq message
+      it 'the client gets the message' do
+        expect(client.capture_output.chomp).to eq message
+      end
+    end
+  end
+  describe '#ask_for_player' do
+    context 'when player is asked' do
+      let!(:client) { create_test_client }
+      let(:server_client) { Client.new(@server.clients.first.socket, player_id: 1) }
+      before do
+        server_client.ask_for_player
+      end
+      it 'sends message to player' do
+        expect(client.capture_output).to match(/who/i)
+      end
+      it 'does not send message again' do
+        client.capture_output
+        server_client.ask_for_player
+        expect(client.capture_output).to eq ''
+      end
+      it 'returns nil if no response' do
+        expect(server_client.ask_for_player).to be nil
+      end
+      it 'returns input when gets response' do
+        expected_message = '0'
+        client.provide_input(expected_message)
+        expect(server_client.ask_for_player).to eq expected_message
+      end
+    end
+  end
+  describe '#ask_for_rank' do
+    context 'when player is asked' do
+      let!(:client) { create_test_client }
+      let(:server_client) { Client.new(@server.clients.first.socket, player_id: 1) }
+      before do
+        server_client.ask_for_rank
+      end
+      it 'sends message to player' do
+        expect(client.capture_output).to match(/rank/i)
+      end
+      it 'does not send message again' do
+        client.capture_output
+        server_client.ask_for_rank
+        expect(client.capture_output).to eq ''
+      end
+      it 'returns nil if no response' do
+        expect(server_client.ask_for_rank).to be nil
+      end
+      it 'returns input when gets response' do
+        expected_message = 'A'
+        client.provide_input(expected_message)
+        expect(server_client.ask_for_rank).to eq expected_message
       end
     end
   end
