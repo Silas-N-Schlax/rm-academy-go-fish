@@ -27,4 +27,11 @@ describe Card do
       described_class.new('3', 'Bulkogi')
     }.to raise_error Card::InvalidSuit
   end
+  describe '#to_s' do
+    let(:card) { described_class.new('A')}
+    it 'returns card as formatted string' do
+      expected_output = 'A of Spades'
+      expect(card.to_s).to eq expected_output
+    end
+  end
 end
