@@ -3,6 +3,14 @@ class TurnResults
   attr_accessor :current_player, :opponent, :cards_taken,
                 :card_asked_for, :card_picked_up,
                 :goes_again
+  def initialize(round_data)
+    @current_player = round_data[:current_player]
+    @opponent = round_data[:opponent]
+    @cards_taken = round_data[:cards_taken]
+    @card_asked_for = round_data[:card_asked_for]
+    @card_picked_up = round_data[:card_picked_up]
+    @goes_again = round_data[:goes_again]
+  end
 
   def for_current
     message_ary = ["You asked for a #{card_asked_for}, took the following from #{opponent.name}:"]

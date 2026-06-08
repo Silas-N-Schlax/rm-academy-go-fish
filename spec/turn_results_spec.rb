@@ -3,15 +3,7 @@ require_relative '../lib/card'
 require_relative '../lib/player'
 
 describe TurnResults do
-  let(:results) { described_class.new }
-  before do
-    results.opponent = Player.new('Player2', 2)
-    results.current_player = Player.new('Player1', 1)
-    results.card_asked_for = Card.new('K')
-    results.cards_taken = [Card.new('K', 'Hearts')]
-    results.card_picked_up = Card.new('J')
-    results.goes_again = false
-  end
+  let(:results) { described_class.new(mock_data_hash) }
 
   describe '#for_current' do
     it 'returns the message for the current players' do
@@ -36,5 +28,12 @@ describe TurnResults do
       expected_message = 'Player1 went fishing, they do not get to go again.'
       expect(results.went_fishing).to eq expected_message
     end
+  end
+  def mock_data_hash
+    {
+      current_player: Player.new('Player1', 1), opponent: Player.new('Player2', 2),
+      card_asked_for: Card.new('K'), cards_taken: [Card.new('K', 'Hearts')],
+      card_picked_up: Card.new('J'), goes_again: false
+    }
   end
 end
