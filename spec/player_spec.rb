@@ -4,7 +4,7 @@ require_relative '../lib/books'
 
 describe Player do
   describe '#initialize' do
-    let!(:player) { described_class.new('Player1') }
+    let!(:player) { described_class.new('Player1', 1) }
     it 'has a name' do
       expect(player.name).to eq 'Player1'
     end
@@ -14,9 +14,13 @@ describe Player do
     it 'has no books' do
       expect(player.books).to be_empty
     end
+    it 'has a player id of 1' do
+      expected_player_id = 1
+      expect(player.player_id).to eq expected_player_id
+    end
   end
   describe '#add_cards' do
-    let(:player) { described_class.new('Player1') }
+    let(:player) { described_class.new('Player1', 1) }
     let(:card1) { Card.new('A', 'Spades') }
     let(:card2) { Card.new('K', 'Spades') }
     context 'when player has no cards' do
@@ -41,7 +45,7 @@ describe Player do
     end
   end
   describe 'next_card' do
-    let(:player) { described_class.new('Player1') }
+    let(:player) { described_class.new('Player1', 1) }
     context 'when hand is not empty' do
       it 'returns top card and does not remove' do
         card1 = Card.new('A', 'Spades')
@@ -60,7 +64,7 @@ describe Player do
     end
   end
   describe '#take_top_card' do
-    let(:player) { described_class.new('Player1') }
+    let(:player) { described_class.new('Player1', 1) }
     context 'when hand is not empty' do
       it 'returns top card and removes from hand' do
         card1 = Card.new('A', 'Spades')
@@ -79,7 +83,7 @@ describe Player do
     end
   end
   describe '#hand_size' do
-    let(:player) { described_class.new('Player1') }
+    let(:player) { described_class.new('Player1', 1) }
     it 'returns the current hand size' do
       expect(player.hand_size).to eq 0
     end
@@ -93,7 +97,7 @@ describe Player do
     end
   end
   describe '#take_cards_of_rank' do
-    let(:player) { described_class.new('Player1') }
+    let(:player) { described_class.new('Player1', 1) }
     context 'when player does not have the correct card' do
       it 'returns nil' do
         expect(player.take_cards_of_rank('A')).to be_empty
@@ -121,18 +125,28 @@ describe Player do
       end
     end
   end
+  describe '#format_hand' do
+    let(:player) { described_class.new('Player1', 1) }
+    before do
+      player.add_cards([Card.new('A'), Card.new('K')])
+    end
+    it 'returns string of current hand' do
+      expected_formatted_hand = 'Player1, you have the following cards in your hand:\n- A of Spades\n- K of Spades'
+      expect(player.format_hand).to eq expected_formatted_hand
+    end
+  end
   describe '#create_book' do
-    let(:player) { described_class.new('Player1') }
+    let(:player) { described_class.new('Player1', 1) }
     it 'creates a book and adds to books array' do
       expect(player.create_book('K').first).to be_a Book
       expect(player.books_size).to eq 1
     end
   end
   xdescribe '#try_create_books' do
-    let(:player) { described_class.new('Player1') }
+    let(:player) { described_class.new('Player1', 1) }
   end
   describe '#books_size' do
-    let(:player) { described_class.new('Player1') }
+    let(:player) { described_class.new('Player1', 1) }
     it 'returns the current hand size' do
       expect(player.books_size).to eq 0
     end
