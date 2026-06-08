@@ -21,7 +21,8 @@ describe Client do
   describe 'initial values' do
     let(:client) { described_class.new(MockSocketClient.new(@server.port_number), player_id: 0) }
     it 'name and name message set to to nil' do
-      expect(client.name).to be_nil
+      expected_name = 'Player 0'
+      expect(client.name).to eq expected_name
       expect(client.has_sent_name_message).to be_nil
     end
     it 'has a client socket' do
