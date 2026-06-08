@@ -19,7 +19,7 @@ class Client
   end
 
   def ask_for_player
-    return if selected_player
+    return selected_player if selected_player
 
     message = 'Who would you like to ask?'
     write_socket(message + INPUT_SYMBOL) unless selected_player_message
@@ -29,7 +29,7 @@ class Client
   end
 
   def ask_for_rank
-    return if selected_rank
+    return selected_rank if selected_rank
 
     message = 'What rank would you like to ask for?'
     write_socket(message + INPUT_SYMBOL) unless selected_rank_message
