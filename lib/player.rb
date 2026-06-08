@@ -28,11 +28,11 @@ class Player
   end
 
   def format_hand
-    message = "#{name}, you have the following cards in your hand:"
+    message_ary = ["#{name}, you have the following cards in your hand:"]
     hand.each do |card|
-      message += "\\n- #{card}"
+      message_ary << "- #{card}"
     end
-    message
+    message_ary
   end
 
   def take_cards_of_rank(rank)

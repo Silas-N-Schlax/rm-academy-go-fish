@@ -132,7 +132,7 @@ describe Player do
     end
     it 'returns string of current hand' do
       expected_formatted_hand = 'Player1, you have the following cards in your hand:\n- A of Spades\n- K of Spades'
-      expect(player.format_hand).to eq expected_formatted_hand
+      expect(player.format_hand.join('\n')).to eq expected_formatted_hand
     end
   end
   describe '#create_book' do
