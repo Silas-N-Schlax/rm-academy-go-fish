@@ -12,6 +12,7 @@ class Client
     @host = host
     @host_message = false
     @player_id = player_id
+    @name = "Player #{player_id}"
   end
 
   def host?
@@ -44,6 +45,9 @@ class Client
   rescue IO::WaitReadable
     nil
   end
+
+  # TODO: create a method called ask_socket that just
+  # ^ adds the INPUT_SYMBOL auto...?
 
   def write_socket(message)
     socket.puts message
