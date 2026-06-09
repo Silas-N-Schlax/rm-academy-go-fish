@@ -76,6 +76,20 @@ describe Client do
       end
     end
   end
+  describe '#ask_socket' do
+    let!(:client) { create_test_client }
+    let(:server_client) { Client.new(@server.clients.first.socket, player_id: 0) }
+    context 'when a message is sent' do
+      before do
+        message = 'Hello World!'
+        server_client.ask_socket(message)
+      end
+      it 'the client gets the message' do
+        regex = /->/i
+        expect(client.capture_output.chomp).to match regex
+      end
+    end
+  end
   describe '#ask_for_player' do
     context 'when player is asked' do
       let!(:client) { create_test_client }

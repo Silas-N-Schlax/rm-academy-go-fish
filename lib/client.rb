@@ -46,10 +46,11 @@ class Client
     nil
   end
 
-  # TODO: create a method called ask_socket that just
-  # ^ adds the INPUT_SYMBOL auto...?
-
   def write_socket(message)
     socket.puts message
+  end
+
+  def ask_socket(message)
+    socket.puts message + INPUT_SYMBOL
   end
 end
