@@ -181,4 +181,56 @@ describe GoFishGame do
       # book to players books.
     end
   end
+  describe '#valid_player?' do
+    let(:game) { described_class.new([player1, player2, player3]) }
+    it 'returns false if player does not exist' do
+      player_id = 4
+      expect(game.valid_player?(player_id)).to be false
+    end
+    it 'returns a false if player is current player' do
+      player_id = 1
+      expect(game.valid_player?(player_id)).to be false
+    end
+    it 'returns true if player exists and is not self' do
+      player_id = 2
+      expect(game.valid_player?(player_id)).to be true
+    end
+  end
+  describe '#valid_rank?' do
+    let(:game) { described_class.new([player1]) }
+    it 'returns false if rank does not exist' do
+      rank = 'L'
+      expect(game.valid_rank?(rank)).to be false
+    end
+    it 'returns true if rank exists and is not self' do
+      rank = 'K'
+      expect(game.valid_rank?(rank)).to be true
+    end
+  end
+  describe '#has_card?' do
+    let!(:game) { described_class.new([player1]) }
+    let(:player) { game.players.first }
+    before { player.add_cards([Card.new('J')]) }
+    it 'returns false if current player does not have card' do
+      rank = 'K'
+      expect(game.cards?(rank)).to be false
+    end
+    it 'returns true if current player does have card' do
+      player.add_cards([Card.new('K')])
+      rank = 'K'
+      expect(game.cards?(rank)).to be true
+    end
+  end
+  describe '#turn_skipped?' do
+    let!(:game) { described_class.new([player1]) }
+    let(:player) { game.players.first }
+    it 'returns false when player can play' do
+      expect(game.turn_skipped?).to be false
+    end
+    it 'returns true when player turn is skipped' do
+      player.hand = []
+      game.deck.cards = []
+      expect(game.turn_skipped?).to be true
+    end
+  end
 end

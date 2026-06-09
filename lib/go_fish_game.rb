@@ -1,6 +1,7 @@
 require_relative 'player'
 require_relative 'deck'
 require_relative 'turn_results'
+require_relative 'card'
 
 SMALL_HAND = 5
 LARGE_HAND = 7
@@ -45,6 +46,27 @@ class GoFishGame
       return player if player.player_id == player_id_to_find
     end
     nil
+  end
+
+  def valid_player?(player_id)
+    return false if player_id == current_player.player_id
+    return true if players.any? { |player| player.player_id == player_id }
+
+    false
+  end
+
+  def valid_rank?(rank)
+    Card.valid_rank?(rank)
+  end
+
+  def cards?(rank)
+    current_player.cards?(rank)
+  end
+
+  def turn_skipped?
+    return true if deck.empty? && current_player.empty_hand?
+
+    false
   end
 
   private
