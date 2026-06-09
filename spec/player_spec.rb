@@ -124,4 +124,21 @@ describe Player do
       expect(player.books_size).to eq 2
     end
   end
+  describe '#cards?' do
+    let(:player) { described_class.new('Player1', 1) }
+    it 'returns false if no cards found' do
+      card_rank = 'J'
+      expect(player.cards?(card_rank)).to be false
+    end
+    it 'returns true if 1 card found' do
+      player.add_cards([Card.new('J')])
+      card_rank = 'J'
+      expect(player.cards?(card_rank)).to be true
+    end
+    it 'returns true if 2 cards found' do
+      player.add_cards([Card.new('J'), Card.new('J')])
+      card_rank = 'J'
+      expect(player.cards?(card_rank)).to be true
+    end
+  end
 end

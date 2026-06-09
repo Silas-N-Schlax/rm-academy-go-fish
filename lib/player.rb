@@ -40,6 +40,12 @@ class Player
   def books_size
     books.size
   end
+
+  def cards?(rank)
+    return true if hand.any? { |card| card.rank == rank }
+
+    false
+  end
   # TODO: #has_card? (check that the player has at least one of the card with the rank given).
 
   private
