@@ -46,7 +46,10 @@ class Player
 
     false
   end
-  # TODO: #has_card? (check that the player has at least one of the card with the rank given).
+
+  def empty_hand?
+    hand.empty?
+  end
 
   private
 

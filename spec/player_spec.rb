@@ -141,4 +141,14 @@ describe Player do
       expect(player.cards?(card_rank)).to be true
     end
   end
+  describe '#empty_hand?' do
+    let(:player) { described_class.new('Player1', 1) }
+    it 'returns false if hand is full' do
+      player.add_cards([Card.new('J')])
+      expect(player.empty_hand?).to be false
+    end
+    it 'returns true if hand is empty' do
+      expect(player.empty_hand?).to be true
+    end
+  end
 end
