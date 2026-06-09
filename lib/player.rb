@@ -13,14 +13,7 @@ class Player
 
   def add_cards(cards)
     cards.each { |card| hand.push(card) }
-  end
-
-  def next_card
-    hand.first
-  end
-
-  def take_top_card
-    hand.shift
+    create_book_if_possible
   end
 
   def hand_size
@@ -44,22 +37,23 @@ class Player
     cards_of_rank
   end
 
-  # TODO: #has_card? (check that the player has at least one of the card with the rank given).
-
-  def create_book(book_rank)
-    books << Book.new(book_rank)
-  end
-
   def books_size
     books.size
   end
+  # TODO: #has_card? (check that the player has at least one of the card with the rank given).
 
   private
 
-  def delete_cards(cards)
-    # ! Remove?
-    cards.each do |card|
-      hand.delete(card)
+  def create_book_if_possible
+    hand.group_by(&:rank).each do |group|
+      card_group = group.last
+      create_book(card_group.first.rank) if card_group.length == 4
     end
+    books.last
+  end
+
+  def create_book(book_rank)
+    books << Book.new(book_rank)
+    take_cards_of_rank(book_rank)
   end
 end

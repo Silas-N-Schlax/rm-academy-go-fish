@@ -36,49 +36,24 @@ describe Player do
       before do
         player.hand = [card3]
       end
-      it 'adds cards to bottom of deck in correct order' do
+      it 'adds cards in correct order and does not create deck' do
         example_hand = [card3, card1, card2]
         player.add_cards([card1, card2])
         expect(player.hand).to eq example_hand
-        expect(player.hand_size).to eq 3
+        expect(player.hand_size).to eq example_hand.size
+        expect(player.books_size).to be_zero
       end
     end
-  end
-  describe 'next_card' do
-    let(:player) { described_class.new('Player1', 1) }
-    context 'when hand is not empty' do
-      it 'returns top card and does not remove' do
-        card1 = Card.new('A', 'Spades')
-        card2 = Card.new('10', 'Spades')
-
-        player.add_cards([card1, card2])
-        expect(player.next_card).to eq card1
-        expect(player.hand_size).to eq 2
+    context 'when a 4th card of the same rank is added' do
+      before do
+        player.hand = [card1, card1, card1, card2]
       end
-    end
-    context 'when hand is empty' do
-      it 'return nil' do
-        expect(player.next_card).to be nil
-        expect(player.hand_size).to eq 0
-      end
-    end
-  end
-  describe '#take_top_card' do
-    let(:player) { described_class.new('Player1', 1) }
-    context 'when hand is not empty' do
-      it 'returns top card and removes from hand' do
-        card1 = Card.new('A', 'Spades')
-        card2 = Card.new('10', 'Spades')
-
-        player.add_cards([card1, card2])
-        expect(player.take_top_card).to eq card1
-        expect(player.hand_size).to eq 1
-      end
-    end
-    context 'when hand is empty' do
-      it 'returns nil' do
-        expect(player.take_top_card).to be nil
-        expect(player.hand_size).to eq 0
+      it 'creates a book with that rank' do
+        expected_books_size = 1
+        expected_hand_size = 1
+        expect(player.add_cards([card1])).to be_a Book
+        expect(player.books_size).to eq expected_books_size
+        expect(player.hand_size).to eq expected_hand_size
       end
     end
   end
@@ -134,16 +109,6 @@ describe Player do
       expected_formatted_hand = 'Player1, you have the following cards in your hand:\n- A of Spades\n- K of Spades'
       expect(player.format_hand.join('\n')).to eq expected_formatted_hand
     end
-  end
-  describe '#create_book' do
-    let(:player) { described_class.new('Player1', 1) }
-    it 'creates a book and adds to books array' do
-      expect(player.create_book('K').first).to be_a Book
-      expect(player.books_size).to eq 1
-    end
-  end
-  xdescribe '#try_create_books' do
-    let(:player) { described_class.new('Player1', 1) }
   end
   describe '#books_size' do
     let(:player) { described_class.new('Player1', 1) }
