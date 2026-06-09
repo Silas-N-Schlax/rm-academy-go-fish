@@ -60,7 +60,8 @@ describe GameSession do
       expect(game_session.run_turn).to be false
     end
     it 'returns if current player has selected a player but not rank' do
-      client1.provide_input('0')
+      player_rank = '0'
+      client1.provide_input(player_rank)
       expect(game_session.run_turn).to be false
     end
     context 'when a turn is played' do
@@ -72,6 +73,38 @@ describe GameSession do
         player1.hand = [Card.new('K')]
         player2.hand = [Card.new('Q')]
         game.deck.cards = [Card.new('2')]
+      end
+      context 'when player has not sent both messages' do
+        let(:rank_message_regex) { /what rank/i }
+        let(:player_message_regex) { /who would/i }
+        let(:rank_input) { 'K' }
+        let(:player_id_input) { '2' }
+        it 'sends a message asking for a player to ask for' do
+          client1.capture_output
+          game_session.run_turn
+          expect(client1.capture_output).to match player_message_regex
+        end
+        it 'sends a message asking for a rank to ask for' do
+          client1.capture_output
+          client1.provide_input(rank_input)
+          game_session.run_turn
+          expect(client1.capture_output).to match rank_message_regex
+        end
+        it 'does not ask for player again' do
+          game_session.selected_player_message = true
+          client1.capture_output
+          game_session.run_turn
+          expect(client1.capture_output).to_not match player_message_regex
+        end
+        it 'does not ask for rank again' do
+          game_session.selected_player_message = true
+          game_session.selected_player = player_id_input
+          game_session.selected_rank_message = true
+          game_session.selected_rank = rank_input
+          client1.capture_output
+          game_session.run_turn
+          expect(client1.capture_output).to_not match player_message_regex
+        end
       end
       it 'starts a plays a turn' do
         client1.provide_input('1')
@@ -88,7 +121,6 @@ describe GameSession do
       end
     end
   end
-  describe ''
 
   def create_test_client
     client = MockSocketClient.new(@server.port_number)

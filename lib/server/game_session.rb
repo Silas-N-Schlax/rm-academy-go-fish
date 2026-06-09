@@ -2,7 +2,9 @@ require_relative '../../lib/go_fish_game'
 require_relative '../../lib/server/user'
 # GameSession class
 class GameSession
-  attr_accessor :game, :current_user
+  attr_accessor :game, :current_user, :selected_player,
+                :selected_player_message, :selected_rank,
+                :selected_rank_message
   attr_reader :clients
 
   def users
@@ -22,17 +24,39 @@ class GameSession
   end
 
   def run_turn
-    current_client = update_current_user.client
-    return false unless current_client.ask_for_player
-    return false unless current_client.ask_for_rank
+    update_current_user
+    return false unless ask_for_player
+    return false unless ask_for_rank
 
-    game.run_turn(current_client.selected_player.to_i, current_client.selected_rank)
+    game.run_turn(selected_player.to_i, selected_rank)
     users.each do |users|
       users.client.write_socket(game.results.for_current)
     end
   end
 
   private
+
+  def ask_for_player
+    return selected_player if selected_player
+
+    client = current_user.client
+    message = 'Who would you like to ask?'
+    client.ask_socket(message) unless selected_player_message
+    self.selected_player_message = true
+    has_message = client.read_socket
+    self.selected_player = has_message&.chomp
+  end
+
+  def ask_for_rank
+    return selected_rank if selected_rank
+
+    client = current_user.client
+    message = 'What rank would you like to ask for?'
+    client.ask_socket(message) unless selected_rank_message
+    self.selected_rank_message = true
+    has_message = client.read_socket
+    self.selected_rank = has_message&.chomp
+  end
 
   def update_current_user
     current_player = game.current_player
