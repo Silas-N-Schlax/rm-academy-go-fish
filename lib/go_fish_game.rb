@@ -9,11 +9,12 @@ LARGE_GAME_MAX_SIZE = 6
 
 # Go Fish Game Class
 class GoFishGame
-  attr_accessor :players, :deck, :results
+  attr_accessor :players, :deck, :results, :current_player_idx
 
   def initialize(new_players)
     @players = create_players(new_players)
     @deck = Deck.new
+    @current_player_idx = 0
   end
 
   def start
@@ -36,7 +37,7 @@ class GoFishGame
   end
 
   def current_player
-    players.first
+    players[current_player_idx]
   end
 
   def find_player(player_id_to_find)
@@ -63,8 +64,14 @@ class GoFishGame
     return players.rotate! if card.nil?
 
     current_player.add_cards([card])
-    players.rotate! unless card.rank == rank
+    update_current_player unless card.rank == rank
     card
+  end
+
+  def update_current_player
+    new_index = current_player_idx + 1
+    first_player_idx = 0
+    self.current_player_idx = new_index > players.size ? first_player_idx : new_index
   end
 
   def deal
