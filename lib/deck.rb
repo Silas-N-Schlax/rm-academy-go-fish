@@ -25,4 +25,8 @@ class Deck
 
     self.cards = new_deck
   end
+
+  def empty?
+    cards.empty?
+  end
 end

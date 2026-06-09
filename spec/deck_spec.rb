@@ -2,7 +2,7 @@ require_relative '../lib/deck'
 require_relative '../lib/card'
 
 describe Deck do
-  it 'Should have 52 cards when created' do
+  it 'should have 52 cards when created' do
     deck = described_class.new
     expect(deck.cards_left).to eq 52
   end
@@ -30,6 +30,16 @@ describe Deck do
       deck2.shuffle_deck
 
       expect(deck1.cards).to_not eq deck2.cards
+    end
+  end
+  describe '#empty?' do
+    let(:deck) { described_class.new }
+    it 'returns false if deck is full' do
+      expect(deck.empty?).to be false
+    end
+    it 'returns true if deck is empty' do
+      deck.cards = []
+      expect(deck.empty?).to be true
     end
   end
 end
