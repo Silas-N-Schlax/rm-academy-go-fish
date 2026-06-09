@@ -47,7 +47,7 @@ class Player
   def create_book_if_possible
     hand.group_by(&:rank).each do |group|
       card_group = group.last
-      create_book(card_group.first.rank) if card_group.length == 4
+      create_book(group.first) if card_group.length == 4
     end
     books.last
   end
