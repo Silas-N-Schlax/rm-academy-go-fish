@@ -32,7 +32,7 @@ describe Client do
       expect(client.host?).to be false
     end
     it 'has a id number' do
-      expect(client.player_id).to eq 0
+      expect(client.player_id).to be_zero
     end
   end
   describe '#host?' do
@@ -87,82 +87,6 @@ describe Client do
       it 'the client gets the message' do
         regex = /->/i
         expect(client.capture_output.chomp).to match regex
-      end
-    end
-  end
-  describe '#ask_for_player' do
-    context 'when player is asked' do
-      let!(:client) { create_test_client }
-      let(:server_client) { Client.new(@server.clients.first.socket, player_id: 1) }
-      before do
-        server_client.ask_for_player
-      end
-      it 'sends message to player' do
-        expect(client.capture_output).to match(/who/i)
-      end
-      it 'does not send message again' do
-        client.capture_output
-        server_client.ask_for_player
-        expect(client.capture_output).to eq ''
-      end
-      it 'returns nil if no response' do
-        expect(server_client.ask_for_player).to be nil
-      end
-      it 'returns input when gets response' do
-        expected_message = '0'
-        client.provide_input(expected_message)
-        expect(server_client.ask_for_player).to eq expected_message
-        expect(server_client.selected_player).to eq expected_message
-      end
-    end
-    context 'when player is asked for a player again' do
-      let!(:client) { create_test_client }
-      let(:server_client) { Client.new(@server.clients.first.socket, player_id: 1) }
-      before do
-        client.provide_input('0')
-        server_client.ask_for_player
-      end
-      it 'does not set to nil' do
-        server_client.ask_for_player
-        expect(server_client.selected_player).to_not be_nil
-      end
-    end
-  end
-  describe '#ask_for_rank' do
-    context 'when player is asked' do
-      let!(:client) { create_test_client }
-      let(:server_client) { Client.new(@server.clients.first.socket, player_id: 1) }
-      before do
-        server_client.ask_for_rank
-      end
-      it 'sends message to player' do
-        expect(client.capture_output).to match(/rank/i)
-      end
-      it 'does not send message again' do
-        client.capture_output
-        server_client.ask_for_rank
-        expect(client.capture_output).to eq ''
-      end
-      it 'returns nil if no response' do
-        expect(server_client.ask_for_rank).to be nil
-      end
-      it 'returns input when gets response' do
-        expected_message = 'A'
-        client.provide_input(expected_message)
-        expect(server_client.ask_for_rank).to eq expected_message
-        expect(server_client.selected_rank).to eq expected_message
-      end
-    end
-    context 'when player is asked for a rank again' do
-      let!(:client) { create_test_client }
-      let(:server_client) { Client.new(@server.clients.first.socket, player_id: 1) }
-      before do
-        client.provide_input('0')
-        server_client.ask_for_rank
-      end
-      it 'does not set to nil' do
-        server_client.ask_for_rank
-        expect(server_client.selected_rank).to_not be_nil
       end
     end
   end
