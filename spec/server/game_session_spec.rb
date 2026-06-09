@@ -107,10 +107,7 @@ describe GameSession do
         end
       end
       it 'starts a plays a turn' do
-        client1.provide_input('1')
-        game_session.run_turn
-        client1.provide_input('Q')
-        game_session.run_turn
+        provide_input_to_pass_turn_checks(client1, game_session)
         expected_hand_size = 2
         expect(player1.hand_size).to eq expected_hand_size
       end
@@ -119,7 +116,21 @@ describe GameSession do
         expected_current_user = game_session.users.first
         expect(game_session.current_user).to eq expected_current_user
       end
+      it 'resets state of messages' do
+        provide_input_to_pass_turn_checks(client1, game_session)
+        expect(game_session.selected_player).to be_nil
+        expect(game_session.selected_player_message).to be_nil
+        expect(game_session.selected_rank).to be_nil
+        expect(game_session.selected_rank_message).to be_nil
+      end
     end
+  end
+
+  def provide_input_to_pass_turn_checks(client, game)
+    client.provide_input('1')
+    game.run_turn
+    client.provide_input('Q')
+    game.run_turn
   end
 
   def create_test_client

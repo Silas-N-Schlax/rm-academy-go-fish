@@ -32,9 +32,17 @@ class GameSession
     users.each do |users|
       users.client.write_socket(game.results.for_current)
     end
+    reset_message_state
   end
 
   private
+
+  def reset_message_state
+    self.selected_player = nil
+    self.selected_player_message = nil
+    self.selected_rank = nil
+    self.selected_rank_message = nil
+  end
 
   def ask_for_player
     return selected_player if selected_player
