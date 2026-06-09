@@ -23,4 +23,10 @@ class Card
   def ==(other)
     rank == other.rank && suit == other.suit
   end
+
+  def self.valid_rank?(rank)
+    return true if RANKS.include?(rank.upcase)
+
+    false
+  end
 end

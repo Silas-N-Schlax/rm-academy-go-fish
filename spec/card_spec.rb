@@ -34,4 +34,14 @@ describe Card do
       expect(card.to_s).to eq expected_output
     end
   end
+  describe '.valid_rank?' do
+    it 'returns false if invalid rank' do
+      rank = 'L'
+      expect(described_class.valid_rank?(rank)).to be false
+    end
+    it 'returns true if valid rank' do
+      rank = 'K'
+      expect(described_class.valid_rank?(rank)).to be true
+    end
+  end
 end
