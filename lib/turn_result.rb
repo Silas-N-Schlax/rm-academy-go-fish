@@ -1,15 +1,16 @@
 # Turn results class
-class TurnResults
+class TurnResult
   attr_accessor :current_player, :opponent, :cards_taken,
                 :card_asked_for, :card_picked_up,
                 :goes_again
-  def initialize(round_data)
-    @current_player = round_data[:current_player]
-    @opponent = round_data[:opponent]
-    @cards_taken = round_data[:cards_taken]
-    @card_asked_for = round_data[:card_asked_for]
-    @card_picked_up = round_data[:card_picked_up]
-    @goes_again = round_data[:goes_again]
+
+  def initialize(current_player:, opponent:, cards_taken:, card_asked_for:, card_picked_up:, goes_again:)
+    @current_player = current_player
+    @opponent = opponent
+    @cards_taken = cards_taken
+    @card_asked_for = card_asked_for
+    @card_picked_up = card_picked_up
+    @goes_again = goes_again
   end
 
   def for_current

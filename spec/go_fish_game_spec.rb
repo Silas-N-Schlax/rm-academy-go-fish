@@ -118,7 +118,7 @@ describe GoFishGame do
         end
         it 'returns a valid round result' do
           expected_message = ''
-          expect(game.results).to be_a TurnResults
+          expect(game.results).to be_a TurnResult
         end
       end
       context 'when player1 asks for a card that they do not have' do

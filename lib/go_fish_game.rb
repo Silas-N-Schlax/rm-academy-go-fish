@@ -1,6 +1,6 @@
 require_relative 'player'
 require_relative 'deck'
-require_relative 'turn_results'
+require_relative 'turn_result'
 require_relative 'card'
 
 SMALL_HAND = 5
@@ -94,12 +94,10 @@ class GoFishGame
   end
 
   def generate_turn_result(opponent, rank, cards, card_picked_up, goes_again)
-    self.results = TurnResults.new(
-      {
-        current_player: current_player, opponent: opponent,
-        card_asked_for: rank, cards_taken: cards,
-        card_picked_up: card_picked_up, goes_again: goes_again
-      }
+    self.results = TurnResult.new(
+      current_player: current_player, opponent: opponent,
+      card_asked_for: rank, cards_taken: cards,
+      card_picked_up: card_picked_up, goes_again: goes_again
     )
   end
 
