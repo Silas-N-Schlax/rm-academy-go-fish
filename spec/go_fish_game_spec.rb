@@ -1,5 +1,6 @@
 require_relative '../lib/go_fish_game'
 require_relative '../lib/card'
+require_relative '../lib/books'
 
 describe GoFishGame do
   let(:player1) { { name: 'player1', player_id: 1 } }
@@ -179,6 +180,34 @@ describe GoFishGame do
       # ^ use constants
       # and that it removes all cards from hand and adds new
       # book to players books.
+    end
+  end
+  describe '#winner?' do
+    let!(:game) { described_class.new([player1, player2]) }
+    context 'when there is no winner' do
+      it 'returns' do
+        expect(game.winner).to be_nil
+      end
+      context 'when there is a winner' do
+        let!(:game_player1) { game.players.first }
+        let!(:game_player2) { game.players.last }
+        before do
+          game.deck = []
+          game_player1.hand = []
+          game_player1.books = [Book.new('K'), Book.new('2')]
+          game_player2.hand = []
+          game_player2.books = [Book.new('J')]
+        end
+        it 'returns the player with the most books' do
+          expect(game.winner.player_id).to be game_player1.player_id
+        end
+        context 'when there is a tie for most books' do
+          it 'returns the player with the highest book' do
+            game_player1.books.pop
+            expect(game.winner).to be game_player1
+          end
+        end
+      end
     end
   end
   describe '#valid_player?' do

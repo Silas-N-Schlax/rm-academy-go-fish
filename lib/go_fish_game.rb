@@ -24,17 +24,18 @@ class GoFishGame
   end
 
   def run_turn(player_id, rank)
+    return if winner
     return nil unless find_player(player_id)
-
-    # TODO: create a method that validates input that is called
-    # by the server returning errors or messages etc...
 
     player_in_question = find_player(player_id)
     cards = player_in_question.take_cards_of_rank(rank)
     current_player.add_cards(cards) unless cards.empty?
     fishing_card = go_fish(rank) if cards.empty?
     generate_turn_result(player_in_question, rank, cards, fishing_card, false)
-    # TODO: update to dynamic
+  end
+
+  def winner
+    winning_player if deck.empty? && players.all?(&:empty_hand?)
   end
 
   def current_player
@@ -70,6 +71,27 @@ class GoFishGame
   end
 
   private
+
+  def winning_player
+    winning_players = []
+    players.each do |player|
+      winning_players << player if winning_players.empty? || winning_players.first.books_size == player.books_size
+      winning_players = [player] if player.books_size > winning_players.first.books_size
+    end
+    return player_highest_book_rank(winning_players) if winning_players.size > 1
+
+    winning_players.first
+  end
+
+  def player_highest_book_rank(tied_players)
+    current_winner = [nil, nil]
+    tied_players.each do |player|
+      player.books.each do |book|
+        current_winner = [player, book] if current_winner[1].nil? || book.value > current_winner[1].value
+      end
+    end
+    current_winner.first
+  end
 
   def generate_turn_result(opponent, rank, cards, card_picked_up, goes_again)
     self.results = TurnResults.new(
