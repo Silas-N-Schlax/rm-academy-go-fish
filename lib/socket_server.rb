@@ -47,8 +47,7 @@ class SocketServer
   end
 
   def run_game(game_session)
-    # call gameSession and .play_game
-    # game_session.play_game
+    game_session.play_game
   end
 
   def stop

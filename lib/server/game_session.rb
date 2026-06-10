@@ -7,6 +7,9 @@ class GameSession
                 :selected_rank_message
   attr_reader :clients
 
+  WHAT_PLAYER_MESSAGE = 'Who would you like to ask?'.freeze
+  WHAT_RANK_MESSAGE = 'What rank would you like to ask for?'.freeze
+
   def users
     @users ||= []
   end
@@ -25,8 +28,10 @@ class GameSession
 
   def run_turn
     update_current_user
-    return false unless ask_for_player
-    return false unless ask_for_rank
+    return unless skip_turn?
+
+    return unless ask_for_player
+    return unless ask_for_rank
 
     game.run_turn(selected_player.to_i, selected_rank)
     users.each do |users|
@@ -36,6 +41,22 @@ class GameSession
   end
 
   private
+
+  def skip_turn?
+    return true unless game.turn_skipped?
+
+    client = current_user.client
+    message = ' turn has been skipped.'
+    client.write_socket("Your#{message}")
+    write_all_but_current("#{client.name}'s#{message}")
+    false
+  end
+
+  def write_all_but_current(message)
+    users.each do |user|
+      user.client.write_socket(message) unless user == current_user
+    end
+  end
 
   def reset_message_state
     self.selected_player = nil
@@ -48,22 +69,36 @@ class GameSession
     return selected_player if selected_player
 
     client = current_user.client
-    message = 'Who would you like to ask?'
-    client.ask_socket(message) unless selected_player_message
+    client.ask_socket(WHAT_PLAYER_MESSAGE) unless selected_player_message
     self.selected_player_message = true
-    has_message = client.read_socket
-    self.selected_player = has_message&.chomp
+    has_message = client.read_socket&.chomp
+    return unless has_message
+
+    self.selected_player = has_message&.chomp if valid_player(has_message.to_i)
+  end
+
+  def valid_player(player_id)
+    return true if game.valid_player?(player_id)
+
+    self.selected_player_message = nil
   end
 
   def ask_for_rank
     return selected_rank if selected_rank
 
     client = current_user.client
-    message = 'What rank would you like to ask for?'
-    client.ask_socket(message) unless selected_rank_message
+    client.ask_socket(WHAT_RANK_MESSAGE) unless selected_rank_message
     self.selected_rank_message = true
-    has_message = client.read_socket
-    self.selected_rank = has_message&.chomp
+    has_message = client.read_socket&.chomp
+    return unless has_message
+
+    self.selected_rank = has_message&.chomp if valid_rank(has_message)
+  end
+
+  def valid_rank(rank)
+    return true if game.valid_rank?(rank) && game.cards?(rank)
+
+    self.selected_rank_message = nil
   end
 
   def update_current_user

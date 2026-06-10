@@ -22,6 +22,7 @@ describe GameSession do
   let(:clients) { @server.clients }
   let(:server_client1) { Client.new(clients.first.socket, player_id: 1) }
   let(:server_client2) { Client.new(clients.last.socket, player_id: 2) }
+
   describe '#create_game_session' do
     let!(:client1) { create_test_client }
     let!(:client2) { create_test_client }
@@ -52,85 +53,155 @@ describe GameSession do
     let!(:client1) { create_test_client }
     let!(:client2) { create_test_client }
     let(:game_session) { described_class.new }
+    let(:game) { game_session.game }
+    let(:users) { game_session.users }
+    let(:player1) { users.first.player }
     before do
       game_session.create_game_session([server_client1, server_client2])
     end
-    let!(:game) { game_session.game }
-    it 'returns false if current player has not selected a player' do
-      expect(game_session.run_turn).to be false
+    it 'updates the current user' do
+      game_session.run_turn
+      expected_current_user = users.first
+      expect(game_session.current_user).to eq expected_current_user
     end
-    it 'returns if current player has selected a player but not rank' do
-      player_rank = '0'
-      client1.provide_input(player_rank)
-      expect(game_session.run_turn).to be false
-    end
-    context 'when a turn is played' do
-      let(:game) { game_session.game }
-      let(:users) { game_session.users }
-      let(:player1) { users.first.player }
-      let(:player2) { users.last.player }
+    context 'when player and deck are empty' do
       before do
-        player1.hand = [Card.new('K')]
-        player2.hand = [Card.new('Q')]
-        game.deck.cards = [Card.new('2')]
+        game.deck.cards = []
+        player1.hand = []
       end
-      context 'when player has not sent both messages' do
-        let(:rank_message_regex) { /what rank/i }
-        let(:player_message_regex) { /who would/i }
-        let(:rank_input) { 'K' }
-        let(:player_id_input) { '2' }
-        it 'sends a message asking for a player to ask for' do
+      it 'returns and sends message' do
+        client1.capture_output
+        client2.capture_output
+        expect(game_session.run_turn).to be_nil
+        current_message = 'Your turn has been skipped.'
+        all_message = 'Player 1\'s turn has been skipped.'
+        expect(client2.capture_output.chomp).to eq all_message
+        expect(client1.capture_output.chomp).to eq current_message
+      end
+    end
+    context 'when player is asked for input' do
+      context 'when no input is provided' do
+        it 'returns and sends message once' do
+          expect(game_session.run_turn).to be_nil
+          player_message_regex = /who would/i
+          expect(client1.capture_output).to match player_message_regex
+          game_session.run_turn
+          expect(client1.capture_output).to be_empty
+        end
+      end
+      context 'when only player selection is provided' do
+        it 'returns and sends messages once' do
+          rank_message_regex = /what rank/i
+          player_id = '2'
+          run_and_capture(game_session, client1)
+          client1.provide_input(player_id)
+          expect(game_session.run_turn).to be_nil
+          expect(client1.capture_output).to match rank_message_regex
+          expect(run_and_capture(game_session, client1)).to be_empty
+        end
+      end
+      context 'when both inputs are provided' do
+        it 'returns true' do
+          player_id = '2'
+          rank_selection = 'K'
+          provide_and_run(game_session, client1, player_id)
+          provide_and_run(game_session, client1, rank_selection)
+          expect(game.results).to_not be_nil
+        end
+      end
+      context 'when invalid player_id is given' do
+        it 'sends message again' do
+          player_id = '6'
+          provide_and_run(game_session, client1, player_id)
           client1.capture_output
           game_session.run_turn
+          player_message_regex = /who would/i
           expect(client1.capture_output).to match player_message_regex
         end
-        it 'sends a message asking for a rank to ask for' do
+      end
+      context 'when invalid then valid player_id is given' do
+        it 'does not send message after valid input' do
+          player_id = '6'
+          provide_and_run(game_session, client1, player_id)
           client1.capture_output
-          client1.provide_input(rank_input)
+          game_session.run_turn
+          client1.capture_output
+          player_id = '2'
+          provide_and_run(game_session, client1, player_id)
+          client1.capture_output
+          game_session.run_turn
+          expect(client1.capture_output).to be_empty
+          # ! Shorten
+        end
+      end
+      context 'when invalid rank is given' do
+        let(:player_id) { '2' }
+        let(:invalid_rank) { 'l' }
+        let(:invalid_rank1) { 'K' }
+        let(:valid_rank) { 'J' }
+        let(:rank_message_regex) { /what rank/i }
+        before do
+          player1.hand = [Card.new(valid_rank)]
+        end
+        it 'sends message again' do
+          provide_run_capture(game_session, client1, player_id)
+          provide_run_capture(game_session, client1, invalid_rank)
           game_session.run_turn
           expect(client1.capture_output).to match rank_message_regex
         end
-        it 'does not ask for player again' do
-          game_session.selected_player_message = true
-          client1.capture_output
+        it 'sends message if valid but does not have' do
+          provide_run_capture(game_session, client1, player_id)
+          provide_run_capture(game_session, client1, invalid_rank)
           game_session.run_turn
-          expect(client1.capture_output).to_not match player_message_regex
-        end
-        it 'does not ask for rank again' do
-          game_session.selected_player_message = true
-          game_session.selected_player = player_id_input
-          game_session.selected_rank_message = true
-          game_session.selected_rank = rank_input
-          client1.capture_output
+          provide_run_capture(game_session, client1, invalid_rank1)
           game_session.run_turn
-          expect(client1.capture_output).to_not match player_message_regex
+          expect(client1.capture_output).to match rank_message_regex
+        end
+        it 'does not send message after valid input' do
+          provide_run_capture(game_session, client1, player_id)
+          provide_run_capture(game_session, client1, invalid_rank)
+          game_session.run_turn
+          provide_run_capture(game_session, client1, valid_rank)
+          game_session.run_turn
+          expect(client1.capture_output).to be_empty
         end
       end
-      it 'starts a plays a turn' do
-        provide_input_to_pass_turn_checks(client1, game_session)
-        expected_hand_size = 2
-        expect(player1.hand_size).to eq expected_hand_size
-      end
-      it 'updates the current player' do
-        game_session.run_turn
-        expected_current_user = game_session.users.first
-        expect(game_session.current_user).to eq expected_current_user
-      end
-      it 'resets state of messages' do
-        provide_input_to_pass_turn_checks(client1, game_session)
-        expect(game_session.selected_player).to be_nil
-        expect(game_session.selected_player_message).to be_nil
-        expect(game_session.selected_rank).to be_nil
-        expect(game_session.selected_rank_message).to be_nil
+      context 'when a turn is completed' do
+        context 'all messages are sent to users' do
+          # ^ Init a 3 player game?
+        end
+        it 'resets state of messages' do
+          provide_input_to_pass_turn_checks(game_session, client1)
+          expect(game_session.selected_player).to be_nil
+          expect(game_session.selected_player_message).to be_nil
+          expect(game_session.selected_rank).to be_nil
+          expect(game_session.selected_rank_message).to be_nil
+        end
       end
     end
   end
 
-  def provide_input_to_pass_turn_checks(client, game)
+  def run_and_capture(session, client)
+    session.run_turn
+    client.capture_output
+  end
+
+  def provide_and_run(session, client, message)
+    client.provide_input(message)
+    session.run_turn
+  end
+
+  def provide_run_capture(session, client, message)
+    client.provide_input(message)
+    session.run_turn
+    client.capture_output
+  end
+
+  def provide_input_to_pass_turn_checks(session, client)
     client.provide_input('1')
-    game.run_turn
+    session.run_turn
     client.provide_input('Q')
-    game.run_turn
+    session.run_turn
   end
 
   def create_test_client
